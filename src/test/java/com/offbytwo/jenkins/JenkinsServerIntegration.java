@@ -116,6 +116,25 @@ public class JenkinsServerIntegration {
 
     // Note this test depends upon the "pr" job existing and successfully building
     @Test
+    public void testDeleteJob() throws Exception {
+        final String sourceJob = "pr";
+        final String jobName = "test-job-" + UUID.randomUUID().toString();
+
+        String sourceXml = server.getJobXml(sourceJob);
+
+        server.createJob(jobName, sourceXml);
+
+        Map<String, Job> jobs = server.getJobs();
+        assertTrue(jobs.containsKey(jobName));
+        JobWithDetails thisJob = jobs.get(jobName).details();
+        assertNotNull(thisJob);
+
+        thisJob.doDelete();
+        assertTrue(server.getJobs().get(jobName) == null);
+    }
+
+    // Note this test depends upon the "pr" job existing and successfully building
+    @Test
     public void testUpdateJob() throws Exception {
         final String sourceJob = "pr";
         final String description = "test-" + UUID.randomUUID().toString();

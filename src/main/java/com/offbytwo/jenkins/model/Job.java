@@ -43,6 +43,13 @@ public class Job extends BaseModel {
     /**
      * Trigger a build without parameters
      */
+    public void doDelete() throws IOException {
+        client.post(url + "doDelete");
+    }
+
+    /**
+     * Trigger a build without parameters
+     */
     public void build() throws IOException {
         client.post(url + "build");
     }
