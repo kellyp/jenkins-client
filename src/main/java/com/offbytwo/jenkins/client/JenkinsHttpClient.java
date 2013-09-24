@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Scanner;
 
+
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -24,7 +25,10 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
+
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.protocol.BasicHttpContext;
+
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -52,6 +56,7 @@ public class JenkinsHttpClient {
         this.uri = uri;
         this.mapper = getDefaultMapper();
         this.client = new DefaultHttpClient();
+		this.client.setRedirectStrategy(new LaxRedirectStrategy());
     }
 
     /**
@@ -139,7 +144,9 @@ public class JenkinsHttpClient {
         HttpResponse response = client.execute(request, localContext);
         int status = response.getStatusLine().getStatusCode();
         if (status < 200 || status >= 300) {
-            throw new HttpResponseException(status, response.getStatusLine().getReasonPhrase());
+            if(status != 405)
+                System.err.println(response.getStatusLine().getReasonPhrase());
+//                throw new HttpResponseException(status, response.getStatusLine().getReasonPhrase());
         }
         try {
             if (cls != null) {
@@ -156,7 +163,7 @@ public class JenkinsHttpClient {
      * Perform a POST request of XML (instead of using json mapper) and return a string rendering of the response entity.
      *
      * @param path path to request, can be relative or absolute
-     * @param XML data data to post
+     * @param xml_data data data to post
      * @return A string containing the xml response (if present)
      * @throws IOException, HttpResponseException
      */
@@ -167,7 +174,7 @@ public class JenkinsHttpClient {
         }
         HttpResponse response = client.execute(request, localContext);
         int status = response.getStatusLine().getStatusCode();
-        if (status < 200 || status >= 300) {
+        if (status < 200 || status >= 300 ) {
             throw new HttpResponseException(status, response.getStatusLine().getReasonPhrase());
         }
         try {
